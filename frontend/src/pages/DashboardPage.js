@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Container, CircularProgress, Grid, Card, CardContent, Button } from '@mui/material';
+import { Typography, CircularProgress, Grid, Card, CardContent, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { motion } from 'framer-motion';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import '@fontsource/orbitron';
+import '@fontsource/rajdhani';
+import 'swiper/swiper-bundle.css';
 
 const DashboardPage = () => {
   const [dashboardData, setDashboardData] = useState({
@@ -31,92 +37,252 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <Container style={{ textAlign: 'center', paddingTop: '5rem' }}>
-        <CircularProgress />
-      </Container>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#0a0a0a',
+        }}
+      >
+        <CircularProgress sx={{ color: 'cyan' }} />
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" style={{ paddingTop: '2rem' }}>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
+    <Box
+      sx={{
+        backgroundColor: '#0a0a0a',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '2rem',
+      }}
+    >
+      {/* Left AI-themed Side */}
+      <Box
+        sx={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '15%', // Reduced width
+          background: 'radial-gradient(circle, #003366, #000)',
+          display: { xs: 'none', md: 'block' },
+        }}
+      />
+      
+      <motion.img
+        src="https://source.unsplash.com/400x900/?ai,technology"
+        alt="AI Design Left"
+        style={{ position: 'fixed', left: 0, width: '10%', height: '100vh', objectFit: 'cover', opacity: 0.2 }} // Reduced width
+        animate={{ opacity: [0, 0.3, 0.5] }}
+        transition={{ duration: 2 }}
+      />
 
-      <Grid container spacing={3}>
-        {/* Uploaded Resumes Section */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Uploaded Resumes
-              </Typography>
-              {dashboardData.resumes.length > 0 ? (
-                dashboardData.resumes.map((resume) => (
-                  <div key={resume.id} style={{ marginBottom: '1rem' }}>
-                    <Typography variant="body1">
-                      <strong>{resume.name}</strong> - {resume.email}
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      component={Link}
-                      to={`/resumes/${resume.id}`}
-                      style={{ marginTop: '0.5rem' }}
-                    >
-                      View Details
-                    </Button>
-                  </div>
-                ))
-              ) : (
-                <Typography variant="body1">No resumes uploaded yet.</Typography>
-              )}
-              <Button
-                variant="contained"
-                color="primary"
-                component={Link}
-                to="/upload"
-                style={{ marginTop: '1rem' }}
-              >
-                Upload New Resume
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* Right AI-themed Side */}
+      <Box
+        sx={{
+          position: 'fixed',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: '15%', // Reduced width
+          background: 'radial-gradient(circle, #003366, #000)',
+          display: { xs: 'none', md: 'block' },
+        }}
+      />
+      
+      <motion.img
+        src="https://source.unsplash.com/400x900/?resume,futuristic"
+        alt="AI Design Right"
+        style={{ position: 'fixed', right: 0, width: '10%', height: '100vh', objectFit: 'cover', opacity: 0.2 }} // Reduced width
+        animate={{ opacity: [0, 0.3, 0.5] }}
+        transition={{ duration: 2 }}
+      />
 
-        {/* Job Matches Section */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Job Matches
-              </Typography>
-              {dashboardData.jobMatches.length > 0 ? (
-                dashboardData.jobMatches.map((job) => (
-                  <div key={job.id} style={{ marginBottom: '1rem' }}>
-                    <Typography variant="body1">
-                      <strong>{job.title}</strong> - {job.company}
-                    </Typography>
-                    <Typography variant="body2">{job.description}</Typography>
-                  </div>
-                ))
-              ) : (
-                <Typography variant="body1">No job matches found.</Typography>
-              )}
-              <Button
-                variant="contained"
-                color="secondary"
-                component={Link}
-                to="/job-roles"
-                style={{ marginTop: '1rem' }}
+      {/* Main Content */}
+      <motion.div
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1 }}
+        style={{ width: '90%', maxWidth: '1700px', margin: '0 auto', paddingTop: '4rem' }} // Increased width
+      >
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontFamily: 'Orbitron',
+            fontWeight: 'bold',
+            color: 'cyan',
+            textShadow: '0px 0px 15px cyan',
+            mb: 4,
+          }}
+        >
+          Dashboard
+        </Typography>
+
+        <Grid container spacing={4} justifyContent="center">
+          {/* Uploaded Resumes Section */}
+          <Grid item xs={12} md={6}>
+            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
+              <Card
+                sx={{
+                  backgroundColor: '#111111',
+                  border: '2px solid cyan',
+                  boxShadow: '0px 0px 15px cyan',
+                  color: 'white',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
               >
-                View All Job Roles
-              </Button>
-            </CardContent>
-          </Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Orbitron', color: 'cyan' }}>
+                    Uploaded Resumes
+                  </Typography>
+                  <Swiper
+                    modules={[Autoplay, Pagination, Navigation]}
+                    spaceBetween={20}
+                    slidesPerView={1}
+                    autoplay={{ delay: 3000, disableOnInteraction: false }}
+                    pagination={{ clickable: true }}
+                    navigation
+                    style={{ width: '100%', paddingBottom: '2rem' }}
+                  >
+                    {dashboardData.resumes.length > 0 ? (
+                      dashboardData.resumes.map((resume) => (
+                        <SwiperSlide key={resume.id}>
+                          <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5 }}
+                          >
+                            <Typography variant="body1">
+                              <strong>{resume.name}</strong> - {resume.email}
+                            </Typography>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              component={Link}
+                              to={`/resumes/${resume.id}`}
+                              sx={{
+                                marginTop: '0.5rem',
+                                color: 'cyan',
+                                borderColor: 'cyan',
+                                '&:hover': { borderColor: 'white', color: 'white' },
+                              }}
+                            >
+                              View Details
+                            </Button>
+                          </motion.div>
+                        </SwiperSlide>
+                      ))
+                    ) : (
+                      <SwiperSlide>
+                        <Typography variant="body1">No resumes uploaded yet.</Typography>
+                      </SwiperSlide>
+                    )}
+                  </Swiper>
+                </CardContent>
+                <Box sx={{ padding: '1rem' }}>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/upload"
+                    sx={{
+                      width: '100%',
+                      backgroundColor: 'cyan',
+                      color: '#0a0a0a',
+                      '&:hover': { backgroundColor: 'white' },
+                    }}
+                  >
+                    Upload New Resume
+                  </Button>
+                </Box>
+              </Card>
+            </motion.div>
+          </Grid>
+
+          {/* Job Matches Section */}
+          <Grid item xs={12} md={6}>
+            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
+              <Card
+                sx={{
+                  backgroundColor: '#111111',
+                  border: '2px solid cyan',
+                  boxShadow: '0px 0px 15px cyan',
+                  color: 'white',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Orbitron', color: 'cyan' }}>
+                    Job Matches
+                  </Typography>
+                  <Swiper
+                    modules={[Autoplay, Pagination, Navigation]}
+                    spaceBetween={20}
+                    slidesPerView={1}
+                    autoplay={{ delay: 3000, disableOnInteraction: false }}
+                    pagination={{ clickable: true }}
+                    navigation
+                    style={{ width: '100%', paddingBottom: '2rem' }}
+                  >
+                    {dashboardData.jobMatches.length > 0 ? (
+                      dashboardData.jobMatches.map((job) => (
+                        <SwiperSlide key={job.id}>
+                          <motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5 }}
+                          >
+                            <Typography variant="body1">
+                              <strong>{job.title}</strong> - {job.company}
+                            </Typography>
+                            <Typography variant="body2">{job.description}</Typography>
+                          </motion.div>
+                        </SwiperSlide>
+                      ))
+                    ) : (
+                      <SwiperSlide>
+                        <Typography variant="body1">No job matches found.</Typography>
+                      </SwiperSlide>
+                    )}
+                  </Swiper>
+                </CardContent>
+                <Box sx={{ padding: '1rem' }}>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/job-roles"
+                    sx={{
+                      width: '100%',
+                      backgroundColor: 'cyan',
+                      color: '#0a0a0a',
+                      '&:hover': { backgroundColor: 'white' },
+                    }}
+                  >
+                    View All Job Roles
+                  </Button>
+                </Box>
+              </Card>
+            </motion.div>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </motion.div>
+    </Box>
   );
 };
 
