@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { Toolbar, Typography, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
@@ -9,10 +9,10 @@ const navItems = ["Home", "Upload", "Dashboard", "Job Roles"];
 
 const Header = () => {
   return (
-    <AppBar
+    <Box
       position="fixed"
       sx={{
-        bgcolor: '#050505',
+        backgroundColor: 'radial-gradient(circle,#003366,#000)',
         boxShadow: '0px 0px 15px cyan',
         top: 0,
         left: 0,
@@ -50,7 +50,7 @@ const Header = () => {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             transition={{ duration: 1, ease: 'easeOut' }}
-            whileHover={{ x: '-5%', transition: { duration: 0.5 } }}
+            whileHover={{ x: '-3%', transition: { duration: 1 } }}
             style={{ display: 'flex', gap: '1rem' }}
           >
             {navItems.map((item, index) => (
@@ -97,7 +97,7 @@ const Header = () => {
           </motion.div>
         </Box>
       </Toolbar>
-    </AppBar>
+      </Box>
   );
 };
 

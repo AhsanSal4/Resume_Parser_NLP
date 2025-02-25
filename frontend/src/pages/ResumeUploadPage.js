@@ -54,80 +54,104 @@ function ResumeUploadPage() {
         overflow: 'hidden',
       }}
     >
-      {/* Left AI-themed Side */}
-      <Box
-        sx={{
+      {/* Background Effects */}
+      <motion.div
+        style={{
           position: 'fixed',
+          top: 0,
           left: 0,
-          top: 0,
-          bottom: 0,
-          width: '20%',
-          background: 'radial-gradient(circle, #003366, #000)',
-          display: { xs: 'none', md: 'block' },
-        }}
-      />
-      
-      <motion.img
-        src="https://source.unsplash.com/400x900/?ai,technology"
-        alt="AI Design Left"
-        style={{ position: 'fixed', left: 0, width: '20%', height: '100vh', objectFit: 'cover', opacity: 0.2 }}
-        animate={{ opacity: [0, 0.3, 0.5] }}
-        transition={{ duration: 2 }}
-      />
-
-      {/* Right AI-themed Side */}
-      <Box
-        sx={{
-          position: 'fixed',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: '20%',
-          background: 'radial-gradient(circle, #003366, #000)',
-          display: { xs: 'none', md: 'block' },
-        }}
-      />
-      
-      <motion.img
-        src="https://source.unsplash.com/400x900/?resume,futuristic"
-        alt="AI Design Right"
-        style={{ position: 'fixed', right: 0, width: '20%', height: '100vh', objectFit: 'cover', opacity: 0.2 }}
-        animate={{ opacity: [0, 0.3, 0.5] }}
-        transition={{ duration: 2 }}
-      />
-
-      <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-        <Typography variant="h3" sx={{ fontFamily: 'Orbitron', fontWeight: 'bold', color: 'cyan', textShadow: '0px 0px 15px cyan', mb: 3 }}>
-          Upload Your Resume
-        </Typography>
-      </motion.div>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2, backgroundColor: '#ff1744', color: 'white' }}>
-          {error}
-        </Alert>
-      )}
-
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
           width: '100%',
-          maxWidth: '600px',
-          margin: '0 auto',
+          height: '100%',
+          zIndex: 0, // Keep background behind
+          background: 'radial-gradient(circle,#003366,#000)',
         }}
       >
+        {/* Glowing Grid Effect */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage:
+              'linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
+          }}
+          animate={{
+            backgroundPosition: ['0px 0px', '50px 50px'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+
+        {/* Particle Effects */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'radial-gradient(circle, cyan 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+          animate={{
+            opacity: [0.2, 0.4, 0.2],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          }}
+        />
+
+        {/* Glow Effect */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.1) 0%, transparent 70%)',
+          }}
+          animate={{
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          }}
+        />
+      </motion.div>
+
+      {/* Content Section */}
+      <Box
+        sx={{
+          zIndex: 1, // Ensures content is visible above background
+          position: 'relative', 
+          width: '100%',
+          maxWidth: '600px',
+        }}
+      >
+        <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+          <Typography variant="h3" sx={{ fontFamily: 'Orbitron', fontWeight: 'bold', color: 'cyan', textShadow: '0px 0px 15px cyan', mb: 3 }}>
+            Upload Your Resume
+          </Typography>
+        </motion.div>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2, backgroundColor: '#ff1744', color: 'white' }}>
+            {error}
+          </Alert>
+        )}
+
         <motion.div
           initial={{ scale: 1 }}
           whileHover={{ scale: 1.05 }}
           transition={{ type: 'spring', stiffness: 300 }}
-          style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            transformOrigin: 'center', // Ensure scaling happens from the center
-          }}
         >
           <Paper
             {...getRootProps()}
@@ -138,7 +162,6 @@ function ResumeUploadPage() {
               backgroundColor: isDragActive ? '#112233' : '#111111',
               border: '2px dashed cyan',
               boxShadow: '0px 0px 15px cyan',
-              width: '100%',
               transition: 'all 0.3s ease-in-out',
               '&:hover': { borderColor: 'white', boxShadow: '0px 0px 25px white' },
             }}

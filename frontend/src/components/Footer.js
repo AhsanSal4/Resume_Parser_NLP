@@ -7,7 +7,7 @@ const Footer = () => {
   return (
     <Box
       sx={{
-        backgroundColor: '#0a0a0a',
+        backgroundColor: 'radial-gradient(circle,#003366,#000)',
         padding: '1rem 0',
         boxShadow: '0px -2px 10px cyan',
         textAlign: 'center',

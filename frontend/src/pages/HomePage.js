@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typography, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
 import '@fontsource/rajdhani';
 
+const images = ['/4.jpg', '/2.jpg', '/3.jpg']; // List of images
+
 const HomePage = () => {
+  const [currentImage, setCurrentImage] = useState(images[0]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prevImage) => {
+        const currentIndex = images.indexOf(prevImage);
+        return images[(currentIndex + 1) % images.length]; // Cycle through images
+      });
+    }, 10000); // Switch every 10 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+
   return (
     <Box
       sx={{
-        backgroundColor: '#0a0a0a',
         minHeight: '100vh',
         display: 'flex',
         justifyContent: 'center',
@@ -17,79 +31,115 @@ const HomePage = () => {
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden',
+        paddingTop: '64px', // Space for header
+        paddingBottom: '56px', // Space for footer
       }}
     >
-      {/* Left AI-themed Design */}
-      <Box
-        sx={{
+      {/* Original Animated Background Effects */}
+      <motion.div
+        style={{
           position: 'fixed',
+          top: 0,
           left: 0,
-          top: 0,
-          bottom: 0,
-          width: '20%',
-          background: 'radial-gradient(circle, #003366, #000)',
-          display: { xs: 'none', md: 'block' },
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+          background: 'radial-gradient(circle,#003366,#000)',
         }}
       >
-        <motion.img
-          src="https://source.unsplash.com/400x900/?ai,technology,neural"
-          alt="AI Design Left"
+        {/* Glowing Grid Effect */}
+        <motion.div
           style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
             width: '100%',
-            height: '100vh',
-            objectFit: 'cover',
-            opacity: 0.2,
+            height: '100%',
+            backgroundImage:
+              'linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
           }}
-          animate={{ opacity: [0, 0.3, 0.5] }}
-          transition={{ duration: 2 }}
+          animate={{
+            backgroundPosition: ['0px 0px', '50px 50px'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
         />
-      </Box>
 
-      {/* Right AI-themed Design */}
-      <Box
-        sx={{
-          position: 'fixed',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: '20%',
-          background: 'radial-gradient(circle, #003366, #000)',
-          display: { xs: 'none', md: 'block' },
-        }}
-      >
-        <motion.img
-          src="https://source.unsplash.com/400x900/?resume,futuristic,tech"
-          alt="AI Design Right"
+        {/* Particle Effects */}
+        <motion.div
           style={{
+            position: 'absolute',
             width: '100%',
-            height: '100vh',
-            objectFit: 'cover',
-            opacity: 0.2,
+            height: '100%',
+            backgroundImage: 'radial-gradient(circle, cyan 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
           }}
-          animate={{ opacity: [0, 0.3, 0.5] }}
-          transition={{ duration: 2 }}
+          animate={{
+            opacity: [0.2, 0.4, 0.2],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          }}
         />
-      </Box>
 
-      {/* Main Content (Now Fully Centered) */}
+        {/* Glow Effect */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.1) 0%, transparent 70%)',
+          }}
+          animate={{
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          }}
+        />
+      </motion.div>
+
+      {/* Main Content: Image & Text Section */}
       <Box
         sx={{
           zIndex: 2,
-          maxWidth: '60vw',
-          padding: '2rem',
+          maxWidth: '80vw',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
+          flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
-          minHeight: '100vh',
+          justifyContent: 'center',
+          gap: '3rem',
+          minHeight: 'calc(100vh - 120px)',
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
+        {/* Image Section (Switches Every 10s) */}
+        <motion.img
+          key={currentImage} // Triggers animation on change
+          src={currentImage}
+          alt="Resume Illustration"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1 }}
-          style={{ marginBottom: '20px' }} // Slightly moved up
-        >
+          style={{
+            width: '40%',
+            maxHeight: '400px',
+            objectFit: 'contain',
+            borderRadius: '10px',
+            boxShadow: '0px 0px 15px cyan',
+          }}
+        />
+
+        {/* Text & Button Section */}
+        <Box sx={{ textAlign: 'center', maxWidth: { xs: '100%', md: '50%' } }}>
           <Typography
             variant="h2"
             sx={{
@@ -100,34 +150,21 @@ const HomePage = () => {
               fontSize: { xs: '1.5rem', sm: '2.5rem', md: '3.5rem' },
             }}
           >
-            Welcome to <span style={{ color: 'white' }}>PARSUME</span>
+            Welcome to <span style={{ color: 'white' }}>ParSume</span>
           </Typography>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.2 }}
-        >
           <Typography
             variant="h5"
             sx={{
               fontFamily: 'Rajdhani',
               color: 'white',
-              marginBottom: '30px', // Increased spacing between text & button
+              marginBottom: '30px',
               fontSize: { xs: '1rem', sm: '1.5rem' },
             }}
           >
             "Great teams start with great hires—upload resumes and build success!"
           </Typography>
-        </motion.div>
 
-        {/* Futuristic Animated Button */}
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-        >
           <Button
             variant="contained"
             sx={{
@@ -135,13 +172,10 @@ const HomePage = () => {
               color: 'cyan',
               fontWeight: 'bold',
               fontSize: '1.2rem',
-              marginTop: '1rem',
               padding: '12px 30px',
               border: '2px solid cyan',
               borderRadius: '8px',
               textTransform: 'uppercase',
-              position: 'relative',
-              overflow: 'hidden',
               transition: 'all 0.3s ease-in-out',
               boxShadow: '0px 0px 15px cyan',
               '&:hover': {
@@ -149,26 +183,13 @@ const HomePage = () => {
                 color: '#000',
                 boxShadow: '0px 0px 25px cyan',
               },
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                width: '150%',
-                height: '150%',
-                background:
-                  'linear-gradient(45deg, cyan, transparent, cyan, transparent)',
-                top: '-50%',
-                left: '-50%',
-                opacity: 0.3,
-                transform: 'rotate(45deg)',
-                animation: 'glowEffect 4s infinite linear',
-              },
             }}
             component={Link}
             to="/upload"
           >
             Upload Resume
           </Button>
-        </motion.div>
+        </Box>
       </Box>
     </Box>
   );
