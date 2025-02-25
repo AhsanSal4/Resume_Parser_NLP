@@ -36,6 +36,7 @@ function App() {
             <Route path="/upload" element={<ResumeUploadPage />} />
             <Route path="/resumes/:id" element={<ResumeDetailsPage />} />
             <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<HomePage />} /> 
             <Route path="/job-roles" element={<JobRolesPage />} />
             <Route path="/dashboard" element={<DashboardPage />} /> {/* Add DashboardPage route */}
           </Routes>
