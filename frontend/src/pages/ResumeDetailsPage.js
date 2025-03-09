@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, CircularProgress, Box } from '@mui/material';
+import { Typography, CircularProgress, Box, Alert } from '@mui/material';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
@@ -10,14 +10,16 @@ const ResumeDetailsPage = () => {
   const { id } = useParams();
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchResumeDetails = async () => {
       try {
-        const response = await axios.get(`/api/resumes/${id}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/${id}`);
         setResume(response.data);
-      } catch (error) {
-        console.error('Error fetching resume details:', error);
+      } catch (err) {
+        console.error('Error fetching resume details:', err);
+        setError(err.response?.data?.error || 'Failed to fetch resume details');
       } finally {
         setLoading(false);
       }
@@ -42,6 +44,42 @@ const ResumeDetailsPage = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#0a0a0a',
+        }}
+      >
+        <Alert severity="error" sx={{ backgroundColor: '#ff1744', color: 'white' }}>
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!resume) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#0a0a0a',
+        }}
+      >
+        <Alert severity="warning" sx={{ backgroundColor: '#ffa726', color: 'white' }}>
+          No resume data found.
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -57,68 +95,108 @@ const ResumeDetailsPage = () => {
         padding: '2rem',
       }}
     >
-      {/* Left AI-themed Side */}
-      <Box
-        sx={{
+      {/* Background Effects */}
+      <motion.div
+        style={{
           position: 'fixed',
+          top: 0,
           left: 0,
-          top: 0,
-          bottom: 0,
-          width: '10%',
-          background: 'radial-gradient(circle, #003366, #000)',
-          display: { xs: 'none', md: 'block' },
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+          background: 'radial-gradient(circle,#003366,#000)',
         }}
-      />
-      
-      <motion.img
-        src="https://source.unsplash.com/400x900/?ai,technology"
-        alt="AI Design Left"
-        style={{ position: 'fixed', left: 0, width: '10%', height: '100vh', objectFit: 'cover', opacity: 0.2 }}
-        animate={{ opacity: [0, 0.3, 0.5] }}
-        transition={{ duration: 2 }}
-      />
+      >
+        {/* Glowing Grid Effect */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage:
+              'linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
+          }}
+          animate={{
+            backgroundPosition: ['0px 0px', '50px 50px'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
 
-      {/* Right AI-themed Side */}
-      <Box
-        sx={{
-          position: 'fixed',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: '10%',
-          background: 'radial-gradient(circle, #003366, #000)',
-          display: { xs: 'none', md: 'block' },
-        }}
-      />
-      
-      <motion.img
-        src="https://source.unsplash.com/400x900/?resume,futuristic"
-        alt="AI Design Right"
-        style={{ position: 'fixed', right: 0, width: '10%', height: '100vh', objectFit: 'cover', opacity: 0.2 }}
-        animate={{ opacity: [0, 0.3, 0.5] }}
-        transition={{ duration: 2 }}
-      />
+        {/* Particle Effects */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'radial-gradient(circle, cyan 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+          animate={{
+            opacity: [0.2, 0.4, 0.2],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          }}
+        />
+
+        {/* Glow Effect */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.1) 0%, transparent 70%)',
+          }}
+          animate={{
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          }}
+        />
+      </motion.div>
 
       {/* Main Content */}
-      <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        style={{ width: '80%', maxWidth: '1200px', margin: '0 auto', paddingTop: '4rem' }}
+      <Box
+        sx={{
+          zIndex: 1,
+          position: 'relative',
+          width: '100%',
+          maxWidth: '1200px',
+          padding: '2rem',
+        }}
       >
-        <Typography
-          variant="h4"
-          gutterBottom
-          sx={{
-            fontFamily: 'Orbitron',
-            fontWeight: 'bold',
-            color: 'cyan',
-            textShadow: '0px 0px 15px cyan',
-            mb: 4,
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
         >
-          Resume Details
-        </Typography>
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{
+              fontFamily: 'Orbitron',
+              fontWeight: 'bold',
+              color: 'cyan',
+              textShadow: '0px 0px 15px cyan',
+              mb: 4,
+            }}
+          >
+            Resume Details
+          </Typography>
+        </motion.div>
 
         <Box
           sx={{
@@ -137,13 +215,19 @@ const ResumeDetailsPage = () => {
             Email: <span style={{ color: 'white' }}>{resume.email}</span>
           </Typography>
           <Typography variant="h6" sx={{ fontFamily: 'Rajdhani', color: 'cyan', mb: 2 }}>
-            Skills: <span style={{ color: 'white' }}>{resume.skills.join(', ')}</span>
+            Phone: <span style={{ color: 'white' }}>{resume.phone}</span>
           </Typography>
           <Typography variant="h6" sx={{ fontFamily: 'Rajdhani', color: 'cyan', mb: 2 }}>
-            Experience: <span style={{ color: 'white' }}>{resume.experience} years</span>
+            LinkedIn: <span style={{ color: 'white' }}>{resume.linkedin}</span>
+          </Typography>
+          <Typography variant="h6" sx={{ fontFamily: 'Rajdhani', color: 'cyan', mb: 2 }}>
+            GitHub: <span style={{ color: 'white' }}>{resume.github}</span>
+          </Typography>
+          <Typography variant="h6" sx={{ fontFamily: 'Rajdhani', color: 'cyan', mb: 2 }}>
+            Skills: <span style={{ color: 'white' }}>{resume.skills.join(", ")}</span>
           </Typography>
         </Box>
-      </motion.div>
+      </Box>
     </Box>
   );
 };

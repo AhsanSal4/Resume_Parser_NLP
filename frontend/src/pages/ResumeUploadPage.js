@@ -28,8 +28,7 @@ function ResumeUploadPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/resumes/`, formData);
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/resumes/${response.data.id}/parse/`);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/`, formData);
       navigate(`/resumes/${response.data.id}`);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to upload and parse resume');
@@ -62,7 +61,7 @@ function ResumeUploadPage() {
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 0, // Keep background behind
+          zIndex: 0,
           background: 'radial-gradient(circle,#003366,#000)',
         }}
       >
@@ -130,8 +129,8 @@ function ResumeUploadPage() {
       {/* Content Section */}
       <Box
         sx={{
-          zIndex: 1, // Ensures content is visible above background
-          position: 'relative', 
+          zIndex: 1,
+          position: 'relative',
           width: '100%',
           maxWidth: '600px',
         }}
