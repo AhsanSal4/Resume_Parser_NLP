@@ -169,24 +169,7 @@ def get_resume(resume_id):
     except Exception as e:
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
-# @app.route("/api/resumes", methods=["GET"])
-# def get_all_resumes():
-#     """Fetch all uploaded resumes and remove duplicates by name."""
-#     try:
-#         docs = db.collection("resumes").stream()
-#         resumes_list = [doc.to_dict() for doc in docs]
 
-#         # Remove duplicate resumes based on "name"
-#         unique_resumes = {}
-#         for resume in resumes_list:
-#             phone = resume.get("phone")
-#             if phone and phone not in unique_resumes:
-#                 unique_resumes[phone] = resume  # Store only the first occurrence
-
-#         return jsonify(list(unique_resumes.values())), 200  # Return unique values only
-
-#     except Exception as e:
-#         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
     
 @app.route("/api/resumes/<resume_id>", methods=["DELETE"])
 def delete_resume(resume_id):

@@ -27,39 +27,33 @@ const DashboardPage = () => {
     }
   };
 
-  const handleDelete = async () => {
-    console.log("Deleting resume with ID:", selectedResumeId);
-    if (!selectedResumeId) return;
-  
+  const handleDelete = async (resumeId) => {
+    if (!resumeId) {
+      console.error("Invalid resume ID:", resumeId);
+      return;
+    }
+
     try {
-      const deleteUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/${selectedResumeId}`;
-      console.log("Delete URL:", deleteUrl);
-  
-      const response = await axios.delete(deleteUrl);
-      console.log("Delete response:", response.data);
-  
+      console.log("Deleting Resume with ID:", resumeId);
+      const response = await axios.delete(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/${resumeId}`);
+
       if (response.status === 200) {
-        // Remove the deleted resume from state
-        setResumes(prevResumes => prevResumes.filter(resume => getResumeId(resume) !== selectedResumeId));
+        console.log("Delete response:", response.data);
         alert("Resume deleted successfully!");
+        setResumes((prevResumes) =>
+          prevResumes.filter((resume) => getResumeId(resume) !== resumeId)
+        );
       } else {
-        console.error("Failed to delete:", response.data);
-        alert("Failed to delete resume.");
+        console.error("Failed to delete resume:", response);
       }
     } catch (error) {
       console.error("Error deleting resume:", error);
-      alert(`Failed to delete resume: ${error.message}`);
-    } finally {
-      setOpenDialog(false);
-      setSelectedResumeId(null);
     }
   };
-  
 
   const getResumeId = (resume) => {
-    return resume.id || resume._id || resume.docId || "";  // Ensure a valid ID is returned
+    return resume.id || resume._id || resume.docId || "";
   };
-  
 
   return (
     <Box
@@ -76,7 +70,6 @@ const DashboardPage = () => {
         padding: '2rem',
       }}
     >
-      {/* Background Effects */}
       <motion.div
         style={{
           position: 'fixed',
@@ -88,7 +81,6 @@ const DashboardPage = () => {
           background: 'radial-gradient(circle,#003366,#000)',
         }}
       >
-        {/* Glowing Grid Effect */}
         <motion.div
           style={{
             position: 'absolute',
@@ -109,47 +101,8 @@ const DashboardPage = () => {
             ease: 'linear',
           }}
         />
-
-        {/* Particle Effects */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundImage: 'radial-gradient(circle, cyan 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-          animate={{
-            opacity: [0.2, 0.4, 0.2],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-        />
-
-        {/* Glow Effect */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.1) 0%, transparent 70%)',
-          }}
-          animate={{
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-        />
       </motion.div>
 
-      {/* Main Content */}
       <Box
         sx={{
           zIndex: 1,
@@ -179,16 +132,15 @@ const DashboardPage = () => {
           </Typography>
         </motion.div>
 
-        {/* Uploaded Resumes Section */}
         <Paper
           sx={{
             backgroundColor: '#111111',
             border: '2px solid cyan',
             boxShadow: '0px 0px 15px cyan',
             padding: '2rem',
-            width: '100%', // Make the box full width
-            maxHeight: '600px', // Set a max height for the box
-            overflow: 'auto', // Add scroll if content overflows
+            width: '100%',
+            maxHeight: '600px',
+            overflow: 'auto',
           }}
         >
           <Typography variant="h6" sx={{ fontFamily: 'Orbitron', color: 'cyan', mb: 2 }}>
@@ -210,34 +162,30 @@ const DashboardPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {resumes.map((resume, index) => {
-                  // Log each resume to see its structure
-                  console.log(`Resume ${index}:`, resume);
-                  return (
-                    <TableRow key={index}>
-                      <TableCell sx={{ color: 'white' }}>{resume.name || "N/A"}</TableCell>
-                      <TableCell sx={{ color: 'white' }}>{resume.email || "N/A"}</TableCell>
-                      <TableCell sx={{ color: 'white' }}>{resume.phone || "N/A"}</TableCell>
-                      <TableCell sx={{ color: 'white' }}>{resume.github || "N/A"}</TableCell>
-                      <TableCell sx={{ color: 'white' }}>{resume.linkedin || "N/A"}</TableCell>
-                      <TableCell sx={{ color: 'white' }}>{resume.skills?.join(", ") || "N/A"}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => {
-                            const resumeId = getResumeId(resume);
-                            console.log(`Setting selectedResumeId to: ${resumeId}`);
-                            setSelectedResumeId(resumeId);
-                            setOpenDialog(true);
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {resumes.map((resume, index) => (
+                  <TableRow key={index}>
+                    <TableCell sx={{ color: 'white' }}>{resume.name || "N/A"}</TableCell>
+                    <TableCell sx={{ color: 'white' }}>{resume.email || "N/A"}</TableCell>
+                    <TableCell sx={{ color: 'white' }}>{resume.phone || "N/A"}</TableCell>
+                    <TableCell sx={{ color: 'white' }}>{resume.github || "N/A"}</TableCell>
+                    <TableCell sx={{ color: 'white' }}>{resume.linkedin || "N/A"}</TableCell>
+                    <TableCell sx={{ color: 'white' }}>{resume.skills?.join(", ") || "N/A"}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                          const resumeId = getResumeId(resume);
+                          console.log(`Selected Resume ID for deletion: ${resumeId}`);
+                          setSelectedResumeId(resumeId);
+                          setOpenDialog(true);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           ) : (
@@ -245,6 +193,7 @@ const DashboardPage = () => {
           )}
         </Paper>
       </Box>
+
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle sx={{ fontFamily: 'Orbitron', fontWeight: 'bold', textAlign: 'center' }}>
           Confirm Deletion
@@ -253,7 +202,15 @@ const DashboardPage = () => {
           <Button onClick={() => setOpenDialog(false)} sx={{ fontFamily: 'Rajdhani' }}>
             Cancel
           </Button>
-          <Button onClick={handleDelete} color="error" variant="contained" sx={{ fontFamily: 'Rajdhani' }}>
+          <Button
+            onClick={() => {
+              handleDelete(selectedResumeId);
+              setOpenDialog(false);
+            }}
+            color="error"
+            variant="contained"
+            sx={{ fontFamily: 'Rajdhani' }}
+          >
             Delete
           </Button>
         </DialogActions>
