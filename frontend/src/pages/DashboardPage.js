@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Box, Table, TableHead, TableRow, TableCell, TableBody, Paper, Button, Skeleton } from '@mui/material';
+
+import { Typography, Box, Table, TableHead, TableRow, TableCell, TableBody, Paper, Skeleton, Button, Dialog, DialogTitle, DialogActions } from '@mui/material';
+
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
@@ -8,6 +10,8 @@ import '@fontsource/rajdhani';
 const DashboardPage = () => {
   const [resumes, setResumes] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedResumeId, setSelectedResumeId] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     fetchResumes();
@@ -16,6 +20,9 @@ const DashboardPage = () => {
   const fetchResumes = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes`);
+
+      console.log('Fetched resumes:', response.data);
+
       setResumes(response.data);
     } catch (error) {
       console.error('Error fetching resumes:', error);
@@ -24,14 +31,23 @@ const DashboardPage = () => {
     }
   };
 
+
+  const getResumeId = (resume) => {
+    // Try different possible ID field names used in Firestore
+    return resume.id || resume._id || resume.docId;
+  };
+
+
   const handleDelete = async (resumeId) => {
     try {
       await axios.delete(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/delete_resume/${resumeId}`);
       setResumes(resumes.filter((resume) => resume.id !== resumeId)); // Remove deleted resume from UI
+       alert('Resume deleted successfully!');
     } catch (error) {
       console.error('Failed to delete resume:', error);
     }
   };
+
 
   return (
     <Box
@@ -112,37 +128,46 @@ const DashboardPage = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: 'cyan' }}><b>Filename</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Name</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Email</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Phone</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>GitHub</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>LinkedIn</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Skills</b></TableCell>
-                  <TableCell sx={{ color: 'cyan' }}><b>Actions</b></TableCell>
+
+                  <TableCell sx={{ color: 'cyan' }}><b>Action</b></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {resumes.map((resume) => (
-                  <TableRow key={resume.id}>
-                    <TableCell sx={{ color: 'white' }}>{resume.filename || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.name || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.email || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.phone || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.github || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.linkedin || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.skills.join(", ") || "N/A"}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => handleDelete(resume.id)}
-                      >
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {resumes.map((resume, index) => {
+                  // Log each resume to see its structure
+                  console.log(`Resume ${index}:`, resume);
+                  return (
+                    <TableRow key={index}>
+                      <TableCell sx={{ color: 'white' }}>{resume.name || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.email || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.phone || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.github || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.linkedin || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.skills?.join(", ") || "N/A"}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => {
+                            const resumeId = getResumeId(resume);
+                            console.log(`Setting selectedResumeId to: ${resumeId}`);
+                            setSelectedResumeId(resumeId);
+                            setOpenDialog(true);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+
               </TableBody>
             </Table>
           ) : (
@@ -150,6 +175,19 @@ const DashboardPage = () => {
           )}
         </Paper>
       </Box>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle sx={{ fontFamily: 'Orbitron', fontWeight: 'bold', textAlign: 'center' }}>
+          Confirm Deletion
+        </DialogTitle>
+        <DialogActions sx={{ justifyContent: 'center', padding: '1rem' }}>
+          <Button onClick={() => setOpenDialog(false)} sx={{ fontFamily: 'Rajdhani' }}>
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="error" variant="contained" sx={{ fontFamily: 'Rajdhani' }}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -1,11 +1,20 @@
+import firebase_admin
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import uuid
+from firebase_admin import firestore,credentials
 import gspread
 from google.oauth2.service_account import Credentials
 from resume_parser.ai_model import extract_text_from_pdf, extract_details
+
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_credentials.json")
+    firebase_admin.initialize_app(cred)
+    
+db = firestore.client()
+
 
 app = Flask(__name__)
 CORS(app)
@@ -102,13 +111,22 @@ def upload_resume():
         file_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
         file.save(file_path)
 
-        print(f"✅ File uploaded successfully: {file_path}")
 
         extracted_text = extract_text_from_pdf(file_path)
         if not extracted_text.strip():
-            return jsonify({"error": "Could not extract text from file"}), 500
+            return jsonify({"error": "Could not extract text from the file"}), 500
+
+        print(f"✅ File uploaded successfully: {file_path}")
+
+
 
         parsed_details = extract_details(extracted_text)
+        parsed_details["id"] = unique_filename
+        parsed_details["filename"] = filename
+
+        # Store the parsed resume details in Firebase Firestore
+        db.collection("resumes").document(unique_filename).set(parsed_details)
+
 
         # **CHECK FOR DUPLICATE PHONE NUMBER**
         existing_resumes = sheet.get_all_records()
@@ -124,6 +142,7 @@ def upload_resume():
 
         print("✅ Successfully extracted and stored resume details.")
         return jsonify(parsed_details), 200
+
 
     except Exception as e:
         print(f"❌ Server Error: {str(e)}")
@@ -143,13 +162,16 @@ def get_all_resumes():
 def get_resume(resume_id):
     """Fetch a single resume by ID."""
     try:
-        fetch_resumes_from_sheets()
+        doc = db.collection("resumes").document(resume_id).get()
+        if not doc.exists:
+            fetch_resumes_from_sheets()  # Sync before fetching a single resume
         if resume_id not in resumes:
             return jsonify({"error": "Resume not found"}), 404
-        return jsonify(resumes[resume_id]), 200
+        return jsonify(doc.to_dict()), 200
     except Exception as e:
-        print(f"❌ Server Error: {str(e)}")
-        return jsonify({"error": "Internal Server Error"}), 500
+        return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+
+
 
 @app.route("/api/delete_resume/<resume_id>", methods=["DELETE"])
 def delete_resume(resume_id):
