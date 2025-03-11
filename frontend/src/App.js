@@ -11,7 +11,7 @@ import HomePage from './pages/HomePage';
 import ResumeUploadPage from './pages/ResumeUploadPage';
 import ResumeDetailsPage from './pages/ResumeDetailsPage';
 import JobRolesPage from './pages/JobRolesPage';
-import DashboardPage from './pages/DashBoardPage'; // Import the new DashboardPage
+import DashboardPage from './pages/DashboardPage'; // Import the new DashboardPage
 
 // Create theme
 const theme = createTheme({
