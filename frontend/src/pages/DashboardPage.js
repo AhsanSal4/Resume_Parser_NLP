@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Grid, Card, CardContent, Box, Table, TableHead, TableRow, TableCell, TableBody, Paper, Skeleton } from '@mui/material';
+import { Typography, Box, Table, TableHead, TableRow, TableCell, TableBody, Paper, Skeleton, Button, Dialog, DialogTitle, DialogActions } from '@mui/material';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
@@ -8,21 +8,56 @@ import '@fontsource/rajdhani';
 const DashboardPage = () => {
   const [resumes, setResumes] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedResumeId, setSelectedResumeId] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
-    const fetchResumes = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes`);
-        setResumes(response.data);
-      } catch (error) {
-        console.error('Error fetching resumes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchResumes();
   }, []);
+
+  const fetchResumes = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes`);
+      console.log('Fetched resumes:', response.data);
+      setResumes(response.data);
+    } catch (error) {
+      console.error('Error fetching resumes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    console.log('Deleting resume with ID:', selectedResumeId);
+    if (!selectedResumeId) return;
+
+    try {
+      const deleteUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/${selectedResumeId}`;
+      console.log('Delete URL:', deleteUrl);
+      const response = await axios.delete(deleteUrl);
+      console.log('Delete response:', response);
+      
+      // Remove the deleted resume from state
+      setResumes(resumes.filter(resume => {
+        // Check which ID property exists and use that one
+        const resumeId = resume.id || resume._id || resume.docId;
+        return resumeId !== selectedResumeId;
+      }));
+
+      alert('Resume deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting resume:', error);
+      alert(`Failed to delete resume: ${error.message}`);
+    } finally {
+      setOpenDialog(false);
+      setSelectedResumeId(null);
+    }
+  };
+
+  const getResumeId = (resume) => {
+    // Try different possible ID field names used in Firestore
+    return resume.id || resume._id || resume.docId;
+  };
 
   return (
     <Box
@@ -163,27 +198,44 @@ const DashboardPage = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: 'cyan' }}><b>Filename</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Name</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Email</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Phone</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>GitHub</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>LinkedIn</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Skills</b></TableCell>
+                  <TableCell sx={{ color: 'cyan' }}><b>Action</b></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {resumes.map((resume, index) => (
-                  <TableRow key={index}>
-                    <TableCell sx={{ color: 'white' }}>{resume.filename || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.name || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.email || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.phone || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.github || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.linkedin || "N/A"}</TableCell>
-                    <TableCell sx={{ color: 'white' }}>{resume.skills.join(", ") || "N/A"}</TableCell>
-                  </TableRow>
-                ))}
+                {resumes.map((resume, index) => {
+                  // Log each resume to see its structure
+                  console.log(`Resume ${index}:`, resume);
+                  return (
+                    <TableRow key={index}>
+                      <TableCell sx={{ color: 'white' }}>{resume.name || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.email || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.phone || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.github || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.linkedin || "N/A"}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{resume.skills?.join(", ") || "N/A"}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => {
+                            const resumeId = getResumeId(resume);
+                            console.log(`Setting selectedResumeId to: ${resumeId}`);
+                            setSelectedResumeId(resumeId);
+                            setOpenDialog(true);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (
@@ -191,6 +243,19 @@ const DashboardPage = () => {
           )}
         </Paper>
       </Box>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle sx={{ fontFamily: 'Orbitron', fontWeight: 'bold', textAlign: 'center' }}>
+          Confirm Deletion
+        </DialogTitle>
+        <DialogActions sx={{ justifyContent: 'center', padding: '1rem' }}>
+          <Button onClick={() => setOpenDialog(false)} sx={{ fontFamily: 'Rajdhani' }}>
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="error" variant="contained" sx={{ fontFamily: 'Rajdhani' }}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

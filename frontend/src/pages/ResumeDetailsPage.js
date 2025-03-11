@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, CircularProgress, Box, Alert } from '@mui/material';
+import { Typography, CircularProgress, Box , Alert } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
 import '@fontsource/rajdhani';
 
 const ResumeDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [openConfirm, setOpenConfirm] = useState(false); // For delete confirmation dialog
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,6 +31,16 @@ const ResumeDetailsPage = () => {
 
     fetchResumeDetails();
   }, [id]);
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/resumes/${id}`);
+      alert("Resume deleted successfully!");
+      navigate("/dashboard"); // Redirect to dashboard after deletion
+    } catch (err) {
+      alert("Error deleting resume: " + (err.response?.data?.error || "Unknown error"));
+    }
+  };
 
   if (loading) {
     return (
@@ -226,8 +240,27 @@ const ResumeDetailsPage = () => {
           <Typography variant="h6" sx={{ fontFamily: 'Rajdhani', color: 'cyan', mb: 2 }}>
             Skills: <span style={{ color: 'white' }}>{resume.skills.join(", ")}</span>
           </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            sx={{ mt: 2, fontFamily: "Orbitron" }}
+            onClick={() => setOpenConfirm(true)}
+          >
+            Delete Resume
+          </Button>
         </Box>
       </Box>
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Are you sure you want to delete this resume?</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
