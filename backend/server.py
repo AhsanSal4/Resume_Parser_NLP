@@ -98,7 +98,7 @@ def fetch_resumes_from_sheets():
 
 @app.route("/api/resumes/", methods=["POST"])
 def upload_resume():
-    """Handle file upload and resume parsing."""
+    """Handle file upload and resume parsing with duplicate email check."""
     if "file" not in request.files:
         return jsonify({"error": "No file part"}), 400
 
@@ -121,18 +121,25 @@ def upload_resume():
             return jsonify({"error": "Could not extract text from the file"}), 500
 
         parsed_details = extract_details(extracted_text)
+
+        if "email" not in parsed_details or not parsed_details["email"].strip():
+            return jsonify({"error": "No email found in resume. Cannot check for duplicates."}), 400
+
+        # Fetch existing resumes from Google Sheets
+        fetch_resumes_from_sheets()
+
+        # Check for duplicate email
+        for resume in resumes.values():
+            if resume.get("email") == parsed_details["email"]:
+                return jsonify({"error": "Duplicate resume detected. A resume with this email already exists."}), 409
+
         parsed_details["id"] = unique_filename
         parsed_details["filename"] = filename
 
         # Store the parsed resume details in Firebase Firestore
         db.collection("resumes").document(unique_filename).set(parsed_details)
 
-
-        # Add unique filename as the ID for the resume
-        parsed_details["id"] = unique_filename
-        parsed_details["filename"] = filename
-
-        # Store parsed details in memory (Fix for Dashboard & Details Page)
+        # Store parsed details in memory
         resumes[unique_filename] = parsed_details
 
         # Append the extracted data to Google Sheets
@@ -140,7 +147,6 @@ def upload_resume():
 
         print("✅ Successfully extracted resume details.")
         return jsonify(parsed_details), 200
-
 
     except Exception as e:
         print(f"❌ Server Error: {str(e)}")
