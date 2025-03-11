@@ -169,51 +169,67 @@ def get_resume(resume_id):
     except Exception as e:
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
-@app.route("/api/resumes", methods=["GET"])
-def get_all_resumes():
-    """Fetch all uploaded resumes and remove duplicates by name."""
-    try:
-        docs = db.collection("resumes").stream()
-        resumes_list = [doc.to_dict() for doc in docs]
+# @app.route("/api/resumes", methods=["GET"])
+# def get_all_resumes():
+#     """Fetch all uploaded resumes and remove duplicates by name."""
+#     try:
+#         docs = db.collection("resumes").stream()
+#         resumes_list = [doc.to_dict() for doc in docs]
 
-        # Remove duplicate resumes based on "name"
-        unique_resumes = {}
-        for resume in resumes_list:
-            phone = resume.get("phone")
-            if phone and phone not in unique_resumes:
-                unique_resumes[phone] = resume  # Store only the first occurrence
+#         # Remove duplicate resumes based on "name"
+#         unique_resumes = {}
+#         for resume in resumes_list:
+#             phone = resume.get("phone")
+#             if phone and phone not in unique_resumes:
+#                 unique_resumes[phone] = resume  # Store only the first occurrence
 
-        return jsonify(list(unique_resumes.values())), 200  # Return unique values only
+#         return jsonify(list(unique_resumes.values())), 200  # Return unique values only
 
-    except Exception as e:
-        return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+#     except Exception as e:
+#         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
     
 @app.route("/api/resumes/<resume_id>", methods=["DELETE"])
 def delete_resume(resume_id):
     """Delete a resume by ID and remove the uploaded file."""
     try:
+        print(f"Trying to delete resume: {resume_id}")
+
         doc_ref = db.collection("resumes").document(resume_id)
         doc = doc_ref.get()
+        fetch_resumes_from_sheets()
 
+        if resume_id not in resumes:
+            return jsonify({"error": "Resume not found"}), 404
+        
         if not doc.exists:
             return jsonify({"error": "Resume not found"}), 404
 
         # Retrieve file path from document data
         resume_data = doc.to_dict()
-        filename = resume_data.get("id")  # This should match the saved filename
+        filename = resume_data.get("id")  # Ensure correct filename is used
 
         # Delete document from Firestore
         doc_ref.delete()
+        del resumes[resume_id]
 
         # Remove file from uploads folder
         file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         if os.path.exists(file_path):
             os.remove(file_path)
 
+        # Delete from Google Sheets
+        sheet_data = sheet.get_all_values()
+        for idx, row in enumerate(sheet_data):
+            if row and row[0] == resume_id:  # Ensure ID matches
+                sheet.delete_rows(idx + 1)
+                print(f"Deleted resume {resume_id} from Google Sheets.")
+                break
+
         return jsonify({"message": "Resume deleted successfully"}), 200
 
     except Exception as e:
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+
 
 
 

@@ -28,36 +28,38 @@ const DashboardPage = () => {
   };
 
   const handleDelete = async () => {
-    console.log('Deleting resume with ID:', selectedResumeId);
+    console.log("Deleting resume with ID:", selectedResumeId);
     if (!selectedResumeId) return;
-
+  
     try {
       const deleteUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/${selectedResumeId}`;
-      console.log('Delete URL:', deleteUrl);
+      console.log("Delete URL:", deleteUrl);
+  
       const response = await axios.delete(deleteUrl);
-      console.log('Delete response:', response);
-      
-      // Remove the deleted resume from state
-      setResumes(resumes.filter(resume => {
-        // Check which ID property exists and use that one
-        const resumeId = resume.id || resume._id || resume.docId;
-        return resumeId !== selectedResumeId;
-      }));
-
-      alert('Resume deleted successfully!');
+      console.log("Delete response:", response.data);
+  
+      if (response.status === 200) {
+        // Remove the deleted resume from state
+        setResumes(prevResumes => prevResumes.filter(resume => getResumeId(resume) !== selectedResumeId));
+        alert("Resume deleted successfully!");
+      } else {
+        console.error("Failed to delete:", response.data);
+        alert("Failed to delete resume.");
+      }
     } catch (error) {
-      console.error('Error deleting resume:', error);
+      console.error("Error deleting resume:", error);
       alert(`Failed to delete resume: ${error.message}`);
     } finally {
       setOpenDialog(false);
       setSelectedResumeId(null);
     }
   };
+  
 
   const getResumeId = (resume) => {
-    // Try different possible ID field names used in Firestore
-    return resume.id || resume._id || resume.docId;
+    return resume.id || resume._id || resume.docId || "";  // Ensure a valid ID is returned
   };
+  
 
   return (
     <Box
