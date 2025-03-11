@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+
 import { Typography, Box, Table, TableHead, TableRow, TableCell, TableBody, Paper, Skeleton, Button, Dialog, DialogTitle, DialogActions } from '@mui/material';
+
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
@@ -18,7 +20,9 @@ const DashboardPage = () => {
   const fetchResumes = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes`);
+
       console.log('Fetched resumes:', response.data);
+
       setResumes(response.data);
     } catch (error) {
       console.error('Error fetching resumes:', error);
@@ -27,37 +31,23 @@ const DashboardPage = () => {
     }
   };
 
-  const handleDelete = async () => {
-    console.log('Deleting resume with ID:', selectedResumeId);
-    if (!selectedResumeId) return;
-
-    try {
-      const deleteUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/${selectedResumeId}`;
-      console.log('Delete URL:', deleteUrl);
-      const response = await axios.delete(deleteUrl);
-      console.log('Delete response:', response);
-      
-      // Remove the deleted resume from state
-      setResumes(resumes.filter(resume => {
-        // Check which ID property exists and use that one
-        const resumeId = resume.id || resume._id || resume.docId;
-        return resumeId !== selectedResumeId;
-      }));
-
-      alert('Resume deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting resume:', error);
-      alert(`Failed to delete resume: ${error.message}`);
-    } finally {
-      setOpenDialog(false);
-      setSelectedResumeId(null);
-    }
-  };
 
   const getResumeId = (resume) => {
     // Try different possible ID field names used in Firestore
     return resume.id || resume._id || resume.docId;
   };
+
+
+  const handleDelete = async (resumeId) => {
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/delete_resume/${resumeId}`);
+      setResumes(resumes.filter((resume) => resume.id !== resumeId)); // Remove deleted resume from UI
+       alert('Resume deleted successfully!');
+    } catch (error) {
+      console.error('Failed to delete resume:', error);
+    }
+  };
+
 
   return (
     <Box
@@ -85,67 +75,7 @@ const DashboardPage = () => {
           zIndex: 0,
           background: 'radial-gradient(circle,#003366,#000)',
         }}
-      >
-        {/* Glowing Grid Effect */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage:
-              'linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px)',
-            backgroundSize: '50px 50px',
-          }}
-          animate={{
-            backgroundPosition: ['0px 0px', '50px 50px'],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
-
-        {/* Particle Effects */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundImage: 'radial-gradient(circle, cyan 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-          animate={{
-            opacity: [0.2, 0.4, 0.2],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-        />
-
-        {/* Glow Effect */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.1) 0%, transparent 70%)',
-          }}
-          animate={{
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-        />
-      </motion.div>
+      />
 
       {/* Main Content */}
       <Box
@@ -184,9 +114,9 @@ const DashboardPage = () => {
             border: '2px solid cyan',
             boxShadow: '0px 0px 15px cyan',
             padding: '2rem',
-            width: '100%', // Make the box full width
-            maxHeight: '600px', // Set a max height for the box
-            overflow: 'auto', // Add scroll if content overflows
+            width: '100%',
+            maxHeight: '600px',
+            overflow: 'auto',
           }}
         >
           <Typography variant="h6" sx={{ fontFamily: 'Orbitron', color: 'cyan', mb: 2 }}>
@@ -204,6 +134,7 @@ const DashboardPage = () => {
                   <TableCell sx={{ color: 'cyan' }}><b>GitHub</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>LinkedIn</b></TableCell>
                   <TableCell sx={{ color: 'cyan' }}><b>Skills</b></TableCell>
+
                   <TableCell sx={{ color: 'cyan' }}><b>Action</b></TableCell>
                 </TableRow>
               </TableHead>
@@ -236,6 +167,7 @@ const DashboardPage = () => {
                     </TableRow>
                   );
                 })}
+
               </TableBody>
             </Table>
           ) : (
