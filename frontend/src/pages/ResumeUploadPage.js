@@ -28,8 +28,14 @@ function ResumeUploadPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
+
       const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resumes/`, formData);
-      navigate(`/resumes/${response.data.id}`);
+
+      if (response.data.error) {
+        setError(response.data.error); // Display the error if phone number is already used
+      } else {
+        navigate(`/resumes/${response.data.id}`);
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to upload and parse resume');
     } finally {
@@ -64,67 +70,7 @@ function ResumeUploadPage() {
           zIndex: 0,
           background: 'radial-gradient(circle,#003366,#000)',
         }}
-      >
-        {/* Glowing Grid Effect */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage:
-              'linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px)',
-            backgroundSize: '50px 50px',
-          }}
-          animate={{
-            backgroundPosition: ['0px 0px', '50px 50px'],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
-
-        {/* Particle Effects */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundImage: 'radial-gradient(circle, cyan 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-          animate={{
-            opacity: [0.2, 0.4, 0.2],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-        />
-
-        {/* Glow Effect */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.1) 0%, transparent 70%)',
-          }}
-          animate={{
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-        />
-      </motion.div>
+      />
 
       {/* Content Section */}
       <Box
