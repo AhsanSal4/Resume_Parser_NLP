@@ -169,34 +169,24 @@ def get_resume(resume_id):
     except Exception as e:
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
-
     
 @app.route("/api/resumes/<resume_id>", methods=["DELETE"])
 def delete_resume(resume_id):
-    """Delete a resume by ID and remove the uploaded file."""
+    """Delete a resume by ID from Google Sheets and remove the uploaded file."""
     try:
         print(f"Trying to delete resume: {resume_id}")
 
-        doc_ref = db.collection("resumes").document(resume_id)
-        doc = doc_ref.get()
+        # Fetch latest resumes from Google Sheets
         fetch_resumes_from_sheets()
 
         if resume_id not in resumes:
             return jsonify({"error": "Resume not found"}), 404
         
-        if not doc.exists:
-            return jsonify({"error": "Resume not found"}), 404
-
-        # Retrieve file path from document data
-        resume_data = doc.to_dict()
-        filename = resume_data.get("id")  # Ensure correct filename is used
-
-        # Delete document from Firestore
-        doc_ref.delete()
+        # Remove resume from in-memory storage
         del resumes[resume_id]
 
-        # Remove file from uploads folder
-        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        # Remove the uploaded file from local storage
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], resume_id)
         if os.path.exists(file_path):
             os.remove(file_path)
 
@@ -205,15 +195,15 @@ def delete_resume(resume_id):
         for idx, row in enumerate(sheet_data):
             if row and row[0] == resume_id:  # Ensure ID matches
                 sheet.delete_rows(idx + 1)
-                print(f"Deleted resume {resume_id} from Google Sheets.")
-                break
+                print(f"✅ Deleted resume {resume_id} from Google Sheets.")
+                return jsonify({"message": "Resume deleted successfully"}), 200
 
-        return jsonify({"message": "Resume deleted successfully"}), 200
+        print("⚠️ Resume not found in Google Sheets.")
+        return jsonify({"error": "Resume not found in Google Sheets"}), 404
 
     except Exception as e:
+        print(f"❌ Server Error: {str(e)}")
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
-
-
 
 
 if __name__ == "__main__":
