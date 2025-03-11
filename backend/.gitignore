@@ -1,2 +1,8 @@
 **/uploads
 firebase_credentials.json
+# Ignore all JSON files
+*.json
+
+# Ignore specific JSON file
+res.json
+
