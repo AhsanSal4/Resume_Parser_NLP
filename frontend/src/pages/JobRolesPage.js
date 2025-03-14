@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Fetch all resumes
+import { useNavigate } from "react-router-dom";
 import { Typography, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Button } from "@mui/material";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -7,10 +7,10 @@ import "@fontsource/orbitron";
 import "@fontsource/rajdhani";
 
 const JobRolesPage = () => {
-  const navigate = useNavigate();
-  const [candidates, setCandidates] = useState([]); // ✅ Store multiple resumes
+  const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobRoles = async () => {
@@ -21,13 +21,15 @@ const JobRolesPage = () => {
           throw new Error("No resumes found.");
         }
 
-        console.log("📌 API Response:", response.data); // ✅ Debugging
+        console.log("📌 API Response:", response.data);
 
-        // ✅ Ensure job role extraction is correct
-        setCandidates(response.data.map(resume => ({
-          name: resume.name || "Unknown",
-          jobRole: resume.job_role ?? "Not Assigned",  // ✅ Handle missing job roles
-        })));
+        // ✅ Correct job role extraction (handles multiple roles)
+        setCandidates(
+          response.data.map((resume) => ({
+            name: resume.name || "Unknown",
+            jobRoles: resume.job_roles?.length ? resume.job_roles.join(", ") : "Job Role Pending", // Fix: Handles multiple roles
+          }))
+        );
       } catch (err) {
         console.error("❌ Error fetching job roles:", err);
         setError("Failed to fetch job roles. Try again later.");
@@ -54,6 +56,7 @@ const JobRolesPage = () => {
         backgroundColor: "#0a0a0a",
       }}
     >
+      {/* Background Animation */}
       <motion.div
         style={{
           position: "fixed",
@@ -92,7 +95,7 @@ const JobRolesPage = () => {
             <TableHead>
               <TableRow>
                 <TableCell sx={{ color: "cyan", fontWeight: "bold", textAlign: "center" }}>Candidate Name</TableCell>
-                <TableCell sx={{ color: "cyan", fontWeight: "bold", textAlign: "center" }}>Suggested Job Role</TableCell>
+                <TableCell sx={{ color: "cyan", fontWeight: "bold", textAlign: "center" }}>Suggested Job Roles</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -107,7 +110,7 @@ const JobRolesPage = () => {
                   <TableRow key={index}>
                     <TableCell sx={{ color: "white", textAlign: "center" }}>{candidate.name}</TableCell>
                     <TableCell sx={{ color: "white", textAlign: "center" }}>
-                      {candidate.jobRole !== "Not Assigned" ? candidate.jobRole : "Job Role Pending"}
+                      {candidate.jobRoles}
                     </TableCell>
                   </TableRow>
                 ))
