@@ -7,7 +7,7 @@ import uuid
 from firebase_admin import firestore,credentials
 import gspread
 from google.oauth2.service_account import Credentials
-from resume_parser.ai_model import extract_text_from_pdf, extract_details  # Import the AI model functions
+from ai_model import extract_text_from_pdf, extract_details  # Import the AI model functions
 from job_role_model import suggest_job_role
 
 
@@ -70,9 +70,9 @@ def append_to_google_sheet(data):
         ]
         
         sheet.append_row(row)  # Append the data to the sheet
-        print("✅ Successfully added to Google Sheets.")
+        print(" Successfully added to Google Sheets.")
     except Exception as e:
-        print(f"❌ Error adding to Google Sheets: {str(e)}")
+        print(f"Error adding to Google Sheets: {str(e)}")
 
 def fetch_resumes_from_sheets():
     """Fetch all resume data from Google Sheets and update in-memory storage."""
@@ -97,9 +97,9 @@ def fetch_resumes_from_sheets():
                     "job_roles": record.get("JobRoles", "").split(", ") if record.get("JobRoles") else []                
                 }
 
-        print("✅ Successfully fetched resumes from Google Sheets.")
+        print(" Successfully fetched resumes from Google Sheets.")
     except Exception as e:
-        print(f"❌ Error fetching resumes: {str(e)}")
+        print(f" Error fetching resumes: {str(e)}")
 
 @app.route("/api/resumes/", methods=["POST"])
 def upload_resume():
@@ -151,11 +151,11 @@ def upload_resume():
         # Append the extracted data to Google Sheets
         append_to_google_sheet(parsed_details)
 
-        print("✅ Successfully extracted resume details.")
+        print(" Successfully extracted resume details.")
         return jsonify(parsed_details), 200
 
     except Exception as e:
-        print(f"❌ Server Error: {str(e)}")
+        print(f"Server Error: {str(e)}")
         return jsonify({"error": "Internal Server Error"}), 500
 
 @app.route("/api/resumes", methods=["GET"])
@@ -165,7 +165,7 @@ def get_all_resumes():
         fetch_resumes_from_sheets()  # Sync from Google Sheets
         return jsonify(list(resumes.values())), 200
     except Exception as e:
-        print(f"❌ Server Error: {str(e)}")
+        print(f"Server Error: {str(e)}")
         return jsonify({"error": "Internal Server Error"}), 500
 
 @app.route("/api/resumes/<resume_id>", methods=["GET"])
@@ -207,14 +207,14 @@ def delete_resume(resume_id):
         for idx, row in enumerate(sheet_data):
             if row and row[0] == resume_id:  # Ensure ID matches
                 sheet.delete_rows(idx + 1)
-                print(f"✅ Deleted resume {resume_id} from Google Sheets.")
+                print(f"Deleted resume {resume_id} from Google Sheets.")
                 return jsonify({"message": "Resume deleted successfully"}), 200
 
-        print("⚠️ Resume not found in Google Sheets.")
+        print(" Resume not found in Google Sheets.")
         return jsonify({"error": "Resume not found in Google Sheets"}), 404
 
     except Exception as e:
-        print(f"❌ Server Error: {str(e)}")
+        print(f" Server Error: {str(e)}")
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
 

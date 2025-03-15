@@ -67,7 +67,7 @@ def extract_skills(text):
     # Combine skills from NER, PhraseMatcher, and regex
     all_skills = list(skills.union(set(regex_skills)))
 
-    print("\n🛠️ Extracted Skills:", all_skills)  # Print extracted skills for debugging
+    print("\n Extracted Skills:", all_skills)  # Print extracted skills for debugging
     return all_skills if all_skills else ["Not Found"]
 
 def extract_details(text):
@@ -75,30 +75,30 @@ def extract_details(text):
     details = {}
     doc = nlp(text)
 
-    # 🔹 Extract Email
+    # Extract Email
     email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
     emails = re.findall(email_pattern, text)
     details["email"] = emails[0] if emails else "Not Found"
 
-    # 🔹 Extract Phone Number (Using Regex - spaCy Doesn't Detect Phone Numbers Well)
+    # Extract Phone Number (Using Regex - spaCy Doesn't Detect Phone Numbers Well)
     phone_pattern = r"\+?\d{1,3}[-.\s]?\(?\d{2,4}\)?[-.\s]?\d{3}[-.\s]?\d{3,4}"
     phones = re.findall(phone_pattern, text)
     details["phone"] = phones[0] if phones else "Not Found"
 
-    # 🔹 Extract GitHub
+    # Extract GitHub
     github_pattern = r"github\.com/([a-zA-Z0-9-]+)"
     github_matches = re.findall(github_pattern, text)
     details["github"] = f"github.com/{github_matches[0]}" if github_matches else "Not Found"
 
-    # 🔹 Extract LinkedIn
+    #  Extract LinkedIn
     linkedin_pattern = r"linkedin\.com/in/([a-zA-Z0-9-]+)"
     linkedin_matches = re.findall(linkedin_pattern, text)
     details["linkedin"] = f"linkedin.com/in/{linkedin_matches[0]}" if linkedin_matches else "Not Found"
 
-    # 🔹 Extract Name using Multiple Strategies
+    #  Extract Name using Multiple Strategies
     name = extract_full_name(doc)  # Try with Matcher
 
-    # Step 1️⃣: Look for "Name:" pattern in the top 15 lines
+    # Step 1️: Look for "Name:" pattern in the top 15 lines
     lines = text.split("\n")
     if not name:
         for line in lines[:15]:  
@@ -107,7 +107,7 @@ def extract_details(text):
                 name = match.group(1)
                 break
 
-    # Step 2️⃣: If no name found, check the first significant non-empty line
+    # Step 2️: If no name found, check the first significant non-empty line
     if not name:
         for line in lines:
             words = line.strip().split()
@@ -115,7 +115,7 @@ def extract_details(text):
                 name = line.strip()
                 break
 
-    # Step 3️⃣: If still no name, use spaCy NLP (Named Entity Recognition)
+    # Step 3️: If still no name, use spaCy NLP (Named Entity Recognition)
     if not name:
         for ent in doc.ents:
             if ent.label_ == "PERSON":
@@ -124,8 +124,8 @@ def extract_details(text):
 
     details["name"] = name if name else "Not Found"
 
-    # 🔹 Extract Skills using PhraseMatcher + regex
+    #  Extract Skills using PhraseMatcher + regex
     details["skills"] = extract_skills(text)
 
-    print("\n✅ Extracted Details:\n", details)  # Print extracted details
+    print("\n Extracted Details:\n", details)  # Print extracted details
     return details

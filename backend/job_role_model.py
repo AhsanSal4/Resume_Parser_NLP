@@ -225,6 +225,6 @@ def suggest_job_role(resume_text, extracted_skills):
 
     suggested_role = list(job_roles.keys())[best_match_index]
     
-    print(f"📌 Suggested Job Role: {suggested_role}")  # ✅ Debugging
+    print(f"Suggested Job Role: {suggested_role}")  #  Debugging
 
     return suggested_role
