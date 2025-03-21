@@ -11,6 +11,7 @@ from ai_model import extract_text_from_pdf, extract_details  # Import the AI mod
 from job_role_model import suggest_job_role
 
 
+
 if not firebase_admin._apps:
     cred = credentials.Certificate("firebase_credentials.json")
     firebase_admin.initialize_app(cred)
@@ -20,6 +21,8 @@ db = firestore.client()
 
 app = Flask(__name__)
 CORS(app)
+
+from visualization import visualization_bp  # Import visualization blueprint
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -34,6 +37,7 @@ SPREADSHEET_ID = "1inE9BqLytz8r_t8dAnsSBHp9KPEUeDLaojkvqQgDSE4"  # Replace with 
 creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=["https://www.googleapis.com/auth/spreadsheets"])
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SPREADSHEET_ID).sheet1  # Open the first sheet
+app.register_blueprint(visualization_bp)  # Register blueprint
 
 # Define expected headers
 EXPECTED_HEADERS = ["ID", "Filename", "Name", "Email", "Phone", "LinkedIn", "GitHub", "Skills","JobRoles"]
