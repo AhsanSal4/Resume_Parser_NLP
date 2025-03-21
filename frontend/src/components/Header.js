@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import '@fontsource/orbitron';
 import '@fontsource/rajdhani';
 
-const navItems = ["Home", "Upload", "Dashboard", "Job Roles"];
+const navItems = ["Home", "Upload", "Dashboard", "Job Roles","Visualization"];
 
 const Header = () => {
   return (
@@ -50,7 +50,7 @@ const Header = () => {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             transition={{ duration: 1, ease: 'easeOut' }}
-            whileHover={{ x: '-3%', transition: { duration: 1 } }}
+            whileHover={{ x: '-2.5%', transition: { duration: 1 } }}
             style={{ display: 'flex', gap: '1rem' }}
           >
             {navItems.map((item, index) => (

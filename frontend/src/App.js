@@ -11,7 +11,8 @@ import HomePage from './pages/HomePage';
 import ResumeUploadPage from './pages/ResumeUploadPage';
 import ResumeDetailsPage from './pages/ResumeDetailsPage';
 import JobRolesPage from './pages/JobRolesPage';
-import DashboardPage from './pages/DashboardPage'; // Import the new DashboardPage
+import DashboardPage from './pages/DashboardPage';
+import VisualizationPage from './pages/VisualizationPage'; // Import the new DashboardPage
 
 // Create theme
 const theme = createTheme({
@@ -38,7 +39,9 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/home" element={<HomePage />} /> 
             <Route path="/job-roles" element={<JobRolesPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} /> {/* Add DashboardPage route */}
+            <Route path="/dashboard" element={<DashboardPage />} /> 
+            <Route path="/visualization" element={<VisualizationPage />} />
+            {/* Add DashboardPage route */}
           </Routes>
         </Container>
         <Footer />
