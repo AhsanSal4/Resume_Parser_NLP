@@ -9,14 +9,89 @@ matcher = Matcher(nlp.vocab)
 phrase_matcher = PhraseMatcher(nlp.vocab, attr="LOWER")  # Case-insensitive matching
 
 # List of technical skills to detect
-skill_keywords = [
-    "Python", "Java", "C++", "C#", "C", "Figma", "Canva", "Excel", "JavaScript", 
-    "TypeScript", "React", "Next.js", "Angular", "Vue.js", "Node.js", "HTML", 
-    "CSS", "SQL", "MySQL", "PostgreSQL", "MongoDB", "NoSQL", "Docker", "Kubernetes", 
-    "AWS", "Azure", "GCP", "Git", "CI/CD", "Agile", "Scrum", "Linux", "Windows", 
-    "DevOps", "Testing", "QA", "REST APIs", "GraphQL", "Machine Learning", "AI", 
-    "Data Science", "Cloud Computing", "Cybersecurity", "Networking", 
-    "Mobile Development", "Android", "iOS", "UI/UX", "OpenAI", "MS Office"
+skill_keywords = ["Python","Java","C++","C#","C","JavaScript","TypeScript",
+"React","Next.js","Angular","Vue.js","Node.js","HTML","CSS",
+"PHP","Ruby","Go","Rust","Swift","Kotlin","Perl","Scala",
+"Express.js","Flask","Django","Unity","Unreal Engine","Dart",
+"Microservices","Assembly","Solidity","DApp",
+"SQL","MySQL","PostgreSQL","MongoDB","NoSQL","Oracle","Redis",
+"Elasticsearch","SQLite","Firebase","Cassandra","MariaDB",
+"Big Data","Hive","Spark","Kafka","ETL","Data Warehousing",
+"Docker","Kubernetes","AWS","Azure","GCP","Heroku","Terraform",
+"Ansible","Jenkins","Travis CI","CircleCI","Git","GitLab",
+"Bitbucket","CI/CD","CloudFormation","OpenShift","Cloud Migration",
+"Cloud Penetration Testing","Helm Charts","Cloud Security",
+
+# System Administration
+"Linux","Windows","MacOS","Shell Scripting","Bash","Powershell",
+"Virtualization","Hyper-V","VMware","Zabbix","Nagios","Active Directory",
+
+# Networking & Security
+"Cybersecurity","Firewall Management","Networking","VPN","SSL/TLS","LDAP","OAuth","Penetration Testing","SIEM",
+"Threat Detection","Incident Response","Reverse Engineering",
+"Burp Suite","Metasploit","Nmap","Wireshark","Kali Linux",
+"Encryption","RSA","Elliptic Curve Cryptography","Blockchain Forensics",
+"SOC","IDS/IPS","Threat Intelligence","Incident Response","Log Analysis",
+
+# Web Development
+"REST APIs","GraphQL","WebSockets","SSR","Static Site Generation",
+"PWA","WebAssembly","Bootstrap","Tailwind CSS","jQuery",
+"WordPress","Shopify","Liquid","Magento","WooCommerce",
+"SEO","WCAG","Screen Readers","ARIA",
+
+# Mobile Development
+"Android","iOS","Flutter","React Native","SwiftUI","Xamarin",
+
+# Machine Learning & AI
+"Machine Learning","AI","Data Science","NLP","Deep Learning",
+"TensorFlow","PyTorch","Scikit-learn","Keras","OpenAI","Spacy",
+"Hugging Face","LLMs","Reinforcement Learning","Generative AI",
+"Computer Vision","OpenCV","YOLO","CNN","GPU Computing",
+
+# Data & Analytics
+"Data Analysis","Pandas","NumPy","Matplotlib","Seaborn",
+"Tableau","Power BI","Looker","ETL","Data Mining",
+"Regression Models","Forecasting","Statistics",
+
+# Blockchain & Cryptocurrency
+"Blockchain","Ethereum","Solidity","Smart Contracts",
+"DApp","Web3.js","Crypto Trading","Qiskit",
+
+# Game Development
+"Unity","Unreal Engine","Blender","3D Modeling","Game AI",
+"Game Engines","Oculus SDK","HTC Vive",
+
+# Robotics & Embedded Systems
+"Arduino","Raspberry Pi","RTOS","Microcontrollers","FPGA",
+"VHDL","Verilog","Flight Control","Sensor Fusion","LiDAR",
+
+# Project Management & Collaboration
+"Agile","Scrum","Kanban","Waterfall","JIRA","Trello",
+"Confluence","Slack","Notion","Monday.com","MS Project",
+
+# Soft Skills
+"Communication","Teamwork","Leadership","Critical Thinking",
+"Problem Solving","Creativity","Adaptability","Time Management",
+"Conflict Resolution","Emotional Intelligence","Empathy",
+"Active Listening","Negotiation","Decision Making","Stress Management",
+"Stakeholder Management",
+
+# Design & UI/UX
+"Figma","Canva","Sketch","Adobe XD","Photoshop","Illustrator",
+"InVision","Typography","Color Theory","Wireframing","Prototyping",
+
+# Writing & Documentation
+"Technical Writing","Content Creation","Blogging","SEO",
+"Copywriting","Proofreading","Editing",
+"Digital Marketing","Social Media Management","Email Marketing",
+"Google Analytics","Market Research","PPC","CRM","Salesforce",
+"Customer Support","Call Handling","Ticketing Systems",
+"Complaint Resolution","Technical Support",
+"Accounting","Budgeting","Financial Analysis","Taxation",
+"Bookkeeping","QuickBooks","SAP","Investment Strategies",
+"Valuation","Stock Market","Clinical Trials","Biostatistics","Emergency Response","Patient Care",
+"Quantum Computing","Autonomous Vehicles","Self-Driving Cars",
+"Space Technology","Astrophysics","Satellite Technology"
 ]
 
 # Convert skill keywords into spaCy patterns
@@ -58,17 +133,20 @@ def extract_skills(text):
     # Use PhraseMatcher to find skills in the text
     matches = phrase_matcher(doc)
     for match_id, start, end in matches:
-        skills.add(doc[start:end].text)
+        skills.add(doc[start:end].text.capitalize())  # Convert to lowercase to avoid duplicates
 
     # Fallback Regex-Based Skill Extraction (if spaCy misses skills)
     skill_pattern = r"\b(?:{})\b".format("|".join(re.escape(skill) for skill in skill_keywords))
     regex_skills = re.findall(skill_pattern, text, re.IGNORECASE)
 
-    # Combine skills from NER, PhraseMatcher, and regex
-    all_skills = list(skills.union(set(regex_skills)))
+   # Convert regex-matched skills to lowercase and merge
+    all_skills = set(skills.union({skill.capitalize() for skill in regex_skills}))
+
+    # Return sorted list of unique skills
+    final_skills = sorted(all_skills)
 
     print("\n Extracted Skills:", all_skills)  # Print extracted skills for debugging
-    return all_skills if all_skills else ["Not Found"]
+    return final_skills if final_skills else ["Not Found"]
 
 def extract_details(text):
     """Extracts Name, Email, Phone, GitHub, LinkedIn, and Skills from resume text."""
