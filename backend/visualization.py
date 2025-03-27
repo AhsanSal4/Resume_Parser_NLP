@@ -84,13 +84,21 @@ def get_visualization_data():
                 current_app.logger.info(f"Using date column: {date_column}")
                 
                 # Look for job match score field with different possible column names
-                possible_job_match_columns = ["job_match_score", "JobMatchScore", "match_score", "MatchScore", "jobmatch", "job_score"]
+                possible_job_match_columns = ["job_match_score", "JobMatchScore", "match_score", "MatchScore", "jobmatch", "job_score","JobRoles"]
                 job_match_column = next((col for col in possible_job_match_columns if col in first_record), None)
                 current_app.logger.info(f"Using job match column: {job_match_column}")
+
+                # Look for job role field with different possible column names
+                possible_job_role_columns = ["job_role", "JobRoles", "role", "Role", "JOB_ROLE", "position"]
+                job_role_column = next((col for col in possible_job_role_columns if col in first_record), None)
+                current_app.logger.info(f"Using job role column: {job_role_column}")
             
             # Dictionary to track unique skills per resume to prevent duplicate counting
             resume_id_to_skills = {}
             
+            # Dictionary to count job roles
+            job_role_counter = Counter()
+
             # Process each row from Google Sheets
             for row in all_values:
                 resume_id = row.get("id", str(total_resumes))
@@ -199,6 +207,21 @@ def get_visualization_data():
                                 continue
                     except Exception as e:
                         current_app.logger.warning(f"Invalid date format: {upload_date}, Error: {str(e)}")
+
+                # Process each row to count job roles
+                job_role = None
+                if job_role_column:
+                    job_role = row.get(job_role_column, "").strip()
+                
+                # If job_role is still None, try all possible job role column names
+                if not job_role:
+                    for possible_col in possible_job_role_columns:
+                        if possible_col in row and row[possible_col]:
+                            job_role = row[possible_col].strip()
+                            break
+                
+                if job_role:
+                    job_role_counter[job_role.lower()] += 1
             
             current_app.logger.info(f"Processed {total_resumes} resumes from Google Sheets")
             current_app.logger.info(f"Unique skills found: {dict(skill_counter)}")
@@ -339,6 +362,15 @@ def get_visualization_data():
     else:
         keywords_data = [{"text": k.title(), "value": v} for k, v in keyword_counter.most_common(30)]
 
+    # Calculate percentages for job roles
+    total_roles = sum(job_role_counter.values())
+    job_roles_data = [
+        {"role": k.title(), "percentage": round((v / total_roles) * 100, 2)}
+        for k, v in job_role_counter.items()
+    ]
+
+    current_app.logger.info(f"Job roles data for pie chart: {job_roles_data}")
+
     current_app.logger.info(f"Total resumes processed: {total_resumes}")
     
     # Prepare response data
@@ -347,7 +379,7 @@ def get_visualization_data():
         "skills": skills_data,
         "uploadTrends": trend_data,
         "jobMatchScore": avg_job_match_score,
-        "keywords": keywords_data
+        "jobRoles": job_roles_data  # Add job roles data for pie chart
     }
 
     return jsonify(response_data)

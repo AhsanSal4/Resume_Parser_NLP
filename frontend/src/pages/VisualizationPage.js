@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Card, CardContent, Container, Grid, CircularProgress, IconButton } from "@mui/material";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
 import GaugeChart from "react-gauge-chart";
-import WordCloud from "react-wordcloud";
+//import WordCloud from "react-wordcloud";
 import axios from "axios";
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import CloseIcon from '@mui/icons-material/Close';
@@ -12,6 +12,7 @@ const VisualizationPage = () => {
   const [uploadTrends, setUploadTrends] = useState([]);
   const [jobMatchScore, setJobMatchScore] = useState(0);
   const [keywords, setKeywords] = useState([]);
+  const [jobRoles, setJobRoles] = useState([]); // State for job roles data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [fullscreenCard, setFullscreenCard] = useState(null);
@@ -30,6 +31,7 @@ const VisualizationPage = () => {
           setUploadTrends(Array.isArray(response.data.uploadTrends) ? response.data.uploadTrends : []);
           setJobMatchScore(typeof response.data.jobMatchScore === 'number' ? response.data.jobMatchScore : 0);
           setKeywords(Array.isArray(response.data.keywords) ? response.data.keywords : []);
+          setJobRoles(Array.isArray(response.data.jobRoles) ? response.data.jobRoles : []); // Set job roles data
         }
         setError(null);
       } catch (err) {
@@ -40,6 +42,7 @@ const VisualizationPage = () => {
         setUploadTrends([]);
         setJobMatchScore(0);
         setKeywords([]);
+        setJobRoles([]); // Reset job roles data on error
       } finally {
         setLoading(false);
       }
@@ -105,6 +108,9 @@ const VisualizationPage = () => {
       />
     </Box>
   );
+
+  // Colors for the pie chart
+  const pieColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
 
   // Loading state
   if (loading) {
@@ -178,15 +184,6 @@ const VisualizationPage = () => {
   }
 
   console.log("Rendering with data:", { skillsData, uploadTrends, jobMatchScore, keywords });
-
-  // Word cloud options
-  const wordCloudOptions = {
-    rotations: 2,
-    rotationAngles: [0, 90],
-    fontSizes: [15, 60],
-    colors: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b'],
-    deterministic: true,
-  };
 
   // Fullscreen mode for a card
   const FullscreenCardView = () => {
@@ -298,16 +295,29 @@ const VisualizationPage = () => {
           </Box>
         );
         break;
-      case "keywords":
+      
+      case "jobRoles":
         content = (
           <Box sx={{ height }}>
-            <WordCloud 
-              words={keywords} 
-              options={{
-                ...wordCloudOptions,
-                fontSizes: [20, 100],
-              }}
-            />
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie 
+                  data={jobRoles} 
+                  dataKey="percentage" 
+                  nameKey="role" 
+                  cx="50%" 
+                  cy="50%" 
+                  outerRadius={150} 
+                  fill="#8884d8" 
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {jobRoles.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                  ))}
+                </Pie>
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </Box>
         );
         break;
@@ -319,7 +329,8 @@ const VisualizationPage = () => {
       skills: "Skill Distribution",
       jobMatch: "Job Match Score",
       uploadTrends: "Resume Upload Trends",
-      keywords: "Keyword Word Cloud"
+      keywords: "Keyword Word Cloud",
+      jobRoles: "Job Roles Distribution"
     };
 
     return (
@@ -550,7 +561,9 @@ const VisualizationPage = () => {
               </Card>
             </Grid>
 
-            {/* Word Cloud */}
+           
+
+            {/* Job Roles Pie Chart */}
             <Grid item xs={12} md={6}>
               <Card sx={{ 
                 height: '100%', 
@@ -560,24 +573,39 @@ const VisualizationPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h5" sx={{ fontWeight: "bold", color: '#ffffff' }}>
-                      Keyword Word Cloud
+                      Job Roles Distribution
                     </Typography>
                     <IconButton 
-                      onClick={() => setFullscreenCard("keywords")} 
+                      onClick={() => setFullscreenCard("jobRoles")} 
                       sx={{ color: 'white' }}
                     >
                       <FullscreenIcon />
                     </IconButton>
                   </Box>
                   <Box sx={{ height: 300 }}>
-                    {keywords && keywords.length > 0 ? (
-                      <WordCloud 
-                        words={keywords} 
-                        options={wordCloudOptions}
-                      />
+                    {jobRoles && jobRoles.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie 
+                            data={jobRoles} 
+                            dataKey="percentage" 
+                            nameKey="role" 
+                            cx="50%" 
+                            cy="50%" 
+                            outerRadius={100} 
+                            fill="#8884d8" 
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {jobRoles.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
                     ) : (
                       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                        <Typography variant="body1" sx={{ color: '#ffffff' }}>No keyword data available</Typography>
+                        <Typography variant="body1" sx={{ color: '#ffffff' }}>No job roles data available</Typography>
                       </Box>
                     )}
                   </Box>
